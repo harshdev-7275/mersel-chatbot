@@ -123,18 +123,18 @@ getAllConversations()
   },[])
 
   return (
-    <Sidebar className="!text-gray-100 w-64 z-[9999] " >
-      <SidebarContent className=" h-screen overflow-y-auto bg-[#2e2e2f] w-full">
+    <Sidebar className="!text-white w-64 z-[9999] " >
+      <SidebarContent className=" h-screen overflow-y-auto bg-[#004185] w-full">
         {/* Header */}
         <SidebarGroupLabel className="flex items-start justify-items-start mt-2">
           {/* <SidebarGroupLabel className="text-white"></SidebarGroupLabel> */}
-         <h1 className="text-2xl font-bold text-blue-400 ml-10 ">N+</h1>
+          <Image src="/logo_academy.png" width={150} height={100} className="mx-auto my-5 bg-blend-difference" alt="logo-img"/>
         </SidebarGroupLabel>
 
-        <SidebarMenu className="mt-4">
+        <SidebarMenu className="my-10">
           <SidebarGroup>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild className="text-white">
+              <SidebarMenuButton asChild className="text-white hover:text-[#231F20] hover:bg-white">
                 <button
                   className="px-4 py-2 !text-md"
                   onClick={newConversationHandler}
@@ -148,7 +148,7 @@ getAllConversations()
           
           {today.length > 0 && (
             <SidebarGroup>
-              <SidebarGroupLabel className="px-4 !text-white">
+              <SidebarGroupLabel className="px-4 !text-[#231F20]">
                 Today
               </SidebarGroupLabel>
               <div className="flex flex-col gap-3">
