@@ -1,8 +1,10 @@
+"use client";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { AppSidebar } from "@/components/chatbot-components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import useAuthStore from "@/store/auth-store";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,7 +21,12 @@ export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>)
+
+{
+
+
+const {token} = useAuthStore();
   return (
     <html lang="en">
       <body
@@ -28,7 +35,12 @@ export default function MainLayout({
         <SidebarProvider>
           <AppSidebar />
           <main className="flex h-screen w-full">
-            <SidebarTrigger className="text-white ml-2 mt-2 text-xl" />
+            {
+              token &&(
+                <SidebarTrigger className="text-white ml-2 mt-2 text-xl" />
+              )
+            }
+         
             {children}
           </main>
         </SidebarProvider>

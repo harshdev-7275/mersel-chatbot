@@ -141,7 +141,7 @@ export default function ChatBot() {
 
   useEffect(() => {
     setIsMessageLoading(true); // Trigger skeleton loading
-    getMessageBySession();
+    // getMessageBySession();
   }, [conversationId]);
 
   useEffect(() => {
@@ -248,15 +248,15 @@ export default function ChatBot() {
   ): Promise<void> {
     try {
       console.log("message", isNewConversation);
-      const response = await fetch(RespondQuery, {
+      const response = await fetch(`${API_URL}/conversation/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           session_id: conversationId,
-          user_id: "user123",
+          user_id: "P2866",
           query: message,
           fixed_data: {
-            token: "optional-token",
+            token: token,
           },
         }),
       });
