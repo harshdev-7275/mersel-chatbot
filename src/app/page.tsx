@@ -7,11 +7,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RespondQuery } from "@/helper/constant";
 import useConversationStore from "@/store/useConversationStore";
 import axios from "axios";
+import { API_URL } from "../../env";
 import { User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
 
 interface Message {
   sender: "user" | "bot";
@@ -91,11 +93,20 @@ export default function ChatBot() {
   const [isNewConversation, setIsNewConversation] = useState(true);
   const [isMessageLoading, setIsMessageLoading] = useState(true);
   console.log("hello", conversationId);
+  const { token } = useAuthStore(); // Access token from Zustand
+  const router = useRouter()
 
+  useEffect(() => {
+    console.log("token in chatbot", token)
+    if (!token) {
+      router.push('/login')
+    }
+  }, [])
+  
   const getMessageBySession = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5088/conversation/session?session_id=${conversationId}`
+        `${API_URL}/conversation/session?session_id=${conversationId}`
       );
       console.log("Backend response:", res.data);
 
@@ -124,7 +135,7 @@ export default function ChatBot() {
 
   useEffect(() => {
     setIsMessageLoading(true); // Trigger skeleton loading
-    getMessageBySession();
+    // getMessageBySession();
   }, [conversationId]);
 
   useEffect(() => {
@@ -231,15 +242,15 @@ export default function ChatBot() {
   ): Promise<void> {
     try {
       console.log("message", isNewConversation);
-      const response = await fetch(RespondQuery, {
+      const response = await fetch(`${API_URL}/conversation/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           session_id: conversationId,
-          user_id: "user123",
+          user_id: "P2866",
           query: message,
           fixed_data: {
-            token: "optional-token",
+            token: token,
           },
         }),
       });
