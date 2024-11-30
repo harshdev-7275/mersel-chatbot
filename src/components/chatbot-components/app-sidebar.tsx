@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
 import { FetchAllConversation } from "@/helper/constant";
 import axios from "axios"
+import { API_URL } from "../../../env";
 
 interface Message {
   ai_response: string;
@@ -108,7 +109,7 @@ export function AppSidebar(): JSX.Element {
   const getAllConversations = async()=>{
     try{
 
-        const res = await axios.get(`${FetchAllConversation}?user_id=user123`)
+        const res = await axios.get(`${API_URL}/conversation/all_sessions?user_id=user123`)
         console.log("res", res)
         if(!conversationId){
           newConversationHandler()

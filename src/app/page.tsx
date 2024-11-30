@@ -17,6 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import DynamicCard from "@/components/DynamicCard";
+import useAuthStore from "@/store/auth-store";
+import { useRouter } from "next/navigation";
+import { API_URL } from "../../env";
 
 interface Message {
   sender: "user" | "bot";
@@ -96,11 +99,20 @@ export default function ChatBot() {
   const [isNewConversation, setIsNewConversation] = useState(true);
   const [isMessageLoading, setIsMessageLoading] = useState(true);
   console.log("hello", conversationId);
+  const { token } = useAuthStore(); // Access token from Zustand
+  const router = useRouter()
 
+  useEffect(() => {
+    console.log("token in chatbot", token)
+    if (!token) {
+      router.push('/login')
+    }
+  }, [])
+  
   const getMessageBySession = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5088/conversation/session?session_id=${conversationId}`
+        `${API_URL}/conversation/session?session_id=${conversationId}`
       );
       console.log("Backend response:", res.data);
 
