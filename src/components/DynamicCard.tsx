@@ -25,14 +25,14 @@ type cardProp = {
 const DynamicCard = ({ cardTitle, fields }: cardProp) => {
     console.log("fields", fields, cardTitle)
   return (
-    <Card className="w-[350px] bg-zinc-900">
+    <Card className="w-[350px] bg-white">
       <CardHeader>
-        <CardTitle className="text-white">{cardTitle}</CardTitle>
+        <CardTitle className="text-[#004185]">{cardTitle}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-x-7 gap-y-5">
         {fields.map((field, index) => (
           <div key={index}>
-            <Label className="flex text-white items-center gap-x-2">
+            <Label className="flex text-black items-center gap-x-2">
               {field.heading} :{" "}
               <CardDescription>{field.content}</CardDescription>
             </Label>

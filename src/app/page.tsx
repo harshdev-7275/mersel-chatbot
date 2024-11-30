@@ -13,6 +13,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import useAuthStore from "@/store/auth-store";
+import { useRouter } from "next/navigation";
 
 
 interface Message {
@@ -92,7 +94,7 @@ export default function ChatBot() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isNewConversation, setIsNewConversation] = useState(true);
   const [isMessageLoading, setIsMessageLoading] = useState(true);
-  console.log("hello", conversationId);
+
   const { token } = useAuthStore(); // Access token from Zustand
   const router = useRouter()
 
@@ -135,7 +137,7 @@ export default function ChatBot() {
 
   useEffect(() => {
     setIsMessageLoading(true); // Trigger skeleton loading
-    // getMessageBySession();
+    getMessageBySession();
   }, [conversationId]);
 
   useEffect(() => {

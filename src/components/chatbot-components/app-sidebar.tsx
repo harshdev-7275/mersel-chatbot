@@ -125,118 +125,118 @@ getAllConversations()
 
   return (
     <Sidebar className="!text-white w-64 z-[9999] " >
-      <SidebarContent className=" h-screen overflow-y-auto bg-[#004185] w-full">
-        {/* Header */}
-        <SidebarGroupLabel className="flex items-start justify-items-start mt-2">
-          {/* <SidebarGroupLabel className="text-white"></SidebarGroupLabel> */}
-          <Image src="/logo_academy.png" width={150} height={100} className="mx-auto my-5 bg-blend-difference" alt="logo-img"/>
-        </SidebarGroupLabel>
+    <SidebarContent className=" h-screen overflow-y-auto bg-[#004185] w-full">
+      {/* Header */}
+      <SidebarGroupLabel className="flex items-start justify-items-start mt-2">
+        {/* <SidebarGroupLabel className="text-white"></SidebarGroupLabel> */}
+        <Image src="/logo_academy.png" width={150} height={100} className="mx-auto my-5 bg-blend-difference" alt="logo-img"/>
+      </SidebarGroupLabel>
 
-        <SidebarMenu className="my-10">
+      <SidebarMenu className="my-10">
+        <SidebarGroup>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="text-white hover:text-[#231F20] hover:bg-white">
+              <button
+                className="px-4 py-2 !text-md"
+                onClick={newConversationHandler}
+              >
+                New Chat
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarGroup>
+        {/* Today Section */}
+        
+        {today.length > 0 && (
           <SidebarGroup>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild className="text-white hover:text-[#231F20] hover:bg-white">
-                <button
-                  className="px-4 py-2 !text-md"
-                  onClick={newConversationHandler}
-                >
-                  New Chat
-                </button>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarGroup>
-          {/* Today Section */}
-          
-          {today.length > 0 && (
-            <SidebarGroup>
-              <SidebarGroupLabel className="px-4 !text-[#231F20]">
-                Today
-              </SidebarGroupLabel>
-              <div className="flex flex-col gap-3">
-              {today.map((conversation) => (
-                <SidebarMenuItem key={conversation.session_id}>
-                  <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
-                    <button
-                      className="block px-4 py-2 !text-md "
-                      onClick={() => {
-                        clearConversationId();
-                        setConversationId(conversation.session_id);
-                      }}
-                    >
-                      <span>{conversation.title}</span>
-                      {/* <small className="block text-gray-400 text-xs">
-                        Last active:{" "}
-                        {format(
-                          new Date(conversation.last_active_datetime),
-                          "hh:mm a"
-                        )}
-                      </small> */}
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              </div>
-            </SidebarGroup>
-          )}
-
-          {/* Yesterday Section */}
-          
-          {yesterday.length > 0 && (
-            <SidebarGroup>
-              <SidebarGroupLabel className="px-4 mt-2 !text-white">
-                Yesterday
-              </SidebarGroupLabel>
-              <div className="flex flex-col gap-3">
-              {yesterday.map((conversation) => (
-                <SidebarMenuItem key={conversation.session_id}>
-                  <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
-                    <button
-                      className="block px-4 py-2 w-full item-start !text-md hover:bg-white hover:text-black"
-                      onClick={() => {
-                        clearConversationId();
-                        setConversationId(conversation.session_id);
-                      }}
-                    >
-                      <span>{conversation.title}</span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-                   </div>
-            </SidebarGroup>
-          )}
-     
-
-          {/* Previous 7 Days Section */}
-          {previous7Days.length > 0 && (
-            <SidebarGroup>
-              <SidebarGroupLabel className="px-4 mt-2 !text-white">
-                Previous 7 Days
-              </SidebarGroupLabel>
+            <SidebarGroupLabel className="px-4 !text-white text-xl">
+              Today
+            </SidebarGroupLabel>
             <div className="flex flex-col gap-3">
-            {previous7Days.map((conversation) => (
-                <SidebarMenuItem key={conversation.session_id}>
-                  <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
-                    <button
-                      className="block px-4 py-2 !text-md"
-                      onClick={() => {
-                        clearConversationId();
-                        setConversationId(conversation.session_id);
-                      }}
-                    >
-                      <span>{conversation.title}</span>
-                      {/* <small className="block text-gray-400 text-xs">
-                          Last active: {format(new Date(conversation.last_active_datetime), "MMM d, hh:mm a")}
-                        </small> */}
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            {today.map((conversation) => (
+              <SidebarMenuItem key={conversation.session_id}>
+                <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
+                  <button
+                    className="block px-4 py-2 !text-md "
+                    onClick={() => {
+                      clearConversationId();
+                      setConversationId(conversation.session_id);
+                    }}
+                  >
+                    <span>{conversation.title}</span>
+                    {/* <small className="block text-gray-400 text-xs">
+                      Last active:{" "}
+                      {format(
+                        new Date(conversation.last_active_datetime),
+                        "hh:mm a"
+                      )}
+                    </small> */}
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
             </div>
-            </SidebarGroup>
-          )}
-        </SidebarMenu>
-      </SidebarContent>
-    </Sidebar>
+          </SidebarGroup>
+        )}
+
+        {/* Yesterday Section */}
+        
+        {yesterday.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="px-4 mt-2 !text-white">
+              Yesterday
+            </SidebarGroupLabel>
+            <div className="flex flex-col gap-3">
+            {yesterday.map((conversation) => (
+              <SidebarMenuItem key={conversation.session_id}>
+                <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
+                  <button
+                    className="block px-4 py-2 w-full item-start !text-md hover:bg-white hover:text-black"
+                    onClick={() => {
+                      clearConversationId();
+                      setConversationId(conversation.session_id);
+                    }}
+                  >
+                    <span>{conversation.title}</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+                 </div>
+          </SidebarGroup>
+        )}
+   
+
+        {/* Previous 7 Days Section */}
+        {previous7Days.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="px-4 mt-2 !text-white">
+              Previous 7 Days
+            </SidebarGroupLabel>
+          <div className="flex flex-col gap-3">
+          {previous7Days.map((conversation) => (
+              <SidebarMenuItem key={conversation.session_id}>
+                <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
+                  <button
+                    className="block px-4 py-2 !text-md"
+                    onClick={() => {
+                      clearConversationId();
+                      setConversationId(conversation.session_id);
+                    }}
+                  >
+                    <span>{conversation.title}</span>
+                    {/* <small className="block text-gray-400 text-xs">
+                        Last active: {format(new Date(conversation.last_active_datetime), "MMM d, hh:mm a")}
+                      </small> */}
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </div>
+          </SidebarGroup>
+        )}
+      </SidebarMenu>
+    </SidebarContent>
+  </Sidebar>
   );
 }
