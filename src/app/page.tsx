@@ -1,25 +1,19 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import { CustomMarkdownComponents } from "@/components/chatbot-components/CustomMarkdownComponents";
 import MessageInput from "@/components/chatbot-components/MessageInput";
-import { Bot, ChevronLeft, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import TypewriterText from "@/components/chatbot-components/TypewriterText";
+import DynamicCard from "@/components/DynamicCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RespondQuery } from "@/helper/constant";
+import useConversationStore from "@/store/useConversationStore";
+import axios from "axios";
+import { API_URL } from "../../env";
+import { User } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { CustomMarkdownComponents } from "@/components/chatbot-components/CustomMarkdownComponents";
-import botLogo from "@/assets/botLogo.svg";
-import Image from "next/image";
-import TypewriterText from "@/components/chatbot-components/TypewriterText";
-import { RespondQuery } from "@/helper/constant";
-import optAiLogo from "@/assets/optAiLogo.png";
-import useConversationStore from "@/store/useConversationStore";
-import { Skeleton } from "@/components/ui/skeleton";
-import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
-import DynamicCard from "@/components/DynamicCard";
-import useAuthStore from "@/store/auth-store";
-import { useRouter } from "next/navigation";
-import { API_URL } from "../../env";
+
 
 interface Message {
   sender: "user" | "bot";
@@ -310,7 +304,7 @@ export default function ChatBot() {
   }
 
   return (
-    <div className="flex flex-col items-center bg-[#131314] h-full w-full p-4 overflow-hidden">
+    <div className="flex flex-col items-center bg-[#EBF1F4] h-full w-full p-4 overflow-hidden">
       <div className="w-full max-w-[900px] container mx-auto mt-6 flex flex-col items-center">
         <div className="flex-grow w-full overflow-y-auto scrollbar-hide space-y-4 h-[78vh] mb-4">
           {isMessageLoading ? (
@@ -329,22 +323,17 @@ export default function ChatBot() {
                   }`}
                 >
                   {msg.sender === "user" ? (
-                    <User color="white" size={24} />
+                    <User color="#231F20" size={24} />
                   ) : isStreaming ? (
-                    <div className="flex">
-                      <div className="text-blue-500 text-2xl font-bold">N</div>
-                      <div className="text-blue-500 text-2xl font-bold animate-spin">
-                        +
-                      </div>
-                    </div>
+                    <User color="#1875AA" size={24} />
                   ) : (
-                    <div className="text-blue-500 text-2xl font-bold">N+</div>
+                    <User color="#1875AA" size={24} />
                   )}
                   <div
                     className={`p-2 rounded-lg max-w-full ${
                       msg.sender === "user"
-                        ? "bg-[#2F2F2F] text-white text-right"
-                        : "bg-[#2F2F2F] text-white text-left"
+                        ? "bg-white text-white text-right"
+                        : "bg-white text-white text-left"
                     }`}
                   >
                     <Skeleton className="h-4 w-[250px]" />
@@ -368,23 +357,18 @@ export default function ChatBot() {
                   }`}
                 >
                   {msg.sender === "user" ? (
-                    <User color="white" size={24} />
+                    <User color="#231F20" size={24} />
                   ) : isStreaming ? (
-                    <div className="flex">
-                      <div className="text-blue-500 text-2xl font-bold">N</div>
-                      <div className="text-blue-500 text-2xl font-bold animate-spin">
-                        +
-                      </div>
-                    </div>
+                    <User color="#1875AA" size={24} />
                   ) : (
-                    <div className="text-blue-500 text-2xl font-bold">N+</div>
+                    <User color="#1875AA" size={24} />
                   )}
                   <div className="flex flex-col gap-5">
                     <div
                       className={`p-2 rounded-lg max-w-full ${
                         msg.sender === "user"
-                          ? "bg-[#2F2F2F] text-white text-right"
-                          : "bg-[#2F2F2F] text-white text-left"
+                          ? "bg-white text-right"
+                          : "bg-white text-left"
                       }`}
                     >
                       <ReactMarkdown
@@ -414,7 +398,12 @@ export default function ChatBot() {
             ))
           ) : (
             <div className="flex flex-col gap-4 items-center justify-center w-full h-[80%] mt-10 overflow-hidden">
-              <div className="text-blue-500 text-5xl font-bold">N+</div>
+              <Image
+                src="/logo_mersal_splash.png"
+                width={150}
+                height={150}
+                alt="logo-img"
+              />
               <TypewriterText />
             </div>
           )}
@@ -424,7 +413,7 @@ export default function ChatBot() {
           <MessageInput
             onSend={handleSend}
             disabled={isStreaming}
-            styles="bg-[#1E1F20] text-[#BBC3C2] w-full mx-auto px-4 py-3"
+            styles="bg-white text-[#231F20] w-full mx-auto px-4 py-3"
             inputRef={inputRef}
           />
         </div>

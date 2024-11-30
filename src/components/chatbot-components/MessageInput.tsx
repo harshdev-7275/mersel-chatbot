@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
 import { SendHorizonal } from "lucide-react";
+import React, { useState } from "react";
 
 interface MessageInputProps {
   placeholder?: string;
@@ -20,10 +20,9 @@ export default function MessageInput({
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const handleSend = () => {
     if (onSend && message.trim()) {
-      
       onSend(message);
       setMessage("");
-      textAreaRef.current?.focus()
+      textAreaRef.current?.focus();
     }
   };
 
@@ -49,12 +48,12 @@ export default function MessageInput({
         handleSend();
       }}
     >
-         <textarea
+      <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={`w-full h-[40px] bg-transparent outline-none border-none text-white resize-none p-2 rounded-lg`}
+        className={`w-full h-[40px] bg-transparent outline-none border-none text-[#231F20] resize-none p-2 rounded-lg`}
         rows={3}
         disabled={disabled}
       />
