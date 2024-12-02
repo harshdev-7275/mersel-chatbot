@@ -27,13 +27,13 @@ interface Message {
   user_query: string;
 }
 
-interface Conversation {
-  last_active_datetime: string;
-  messages: Message[];
-  session_id: string;
-  start_datetime: string;
-  title: string;
-}
+// interface Conversation {
+//   last_active_datetime: string;
+//   messages: Message[];
+//   session_id: string;
+//   start_datetime: string;
+//   title: string;
+// }
 
 // Dummy conversations data
 export const conversations: Conversation[] = [
