@@ -16,8 +16,9 @@ import useConversationStore from "@/store/useConversationStore";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
 import { FetchAllConversation } from "@/helper/constant";
-import axios from "axios"
+import axios from "axios";
 import { API_URL } from "../../../env";
+import useAuthStore from "@/store/auth-store";
 
 interface Message {
   ai_response: string;
@@ -91,152 +92,176 @@ function categorizeConversations(conversations: Conversation[]): {
 }
 
 export function AppSidebar(): JSX.Element {
-  const [conversations, setConversations] =useState<Conversation[]>([])
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const { conversationId, setConversationId, clearConversationId } =
     useConversationStore();
 
   const { today, yesterday, previous7Days } =
     categorizeConversations(conversations);
+  const { token, user_id } = useAuthStore(); // Access token from Zustand
 
   const newConversationHandler = (e?: React.MouseEvent) => {
-    if(e){
+    if (e) {
       e.preventDefault();
     }
-  
+
     clearConversationId();
     setConversationId(uuidv4());
-  };
-  const getAllConversations = async()=>{
-    try{
+    getAllConversations();
 
-        const res = await axios.get(`${API_URL}/conversation/all_sessions?user_id=user123`)
-        console.log("res", res)
-        if(!conversationId){
-          newConversationHandler()
-        }
-        setConversations(res.data)
-    }catch(error){
-      console.error("error while getting conversations", error)
+  };
+  const getAllConversations = async () => {
+    try {
+      console.log("user_id", user_id);
+      const res = await axios.get(
+        `${API_URL}/conversation/all_sessions?user_id=${user_id}`
+      );
+      console.log("res", res);
+      if (!conversationId) {
+        newConversationHandler();
+      }
+      setConversations(res.data);
+    } catch (error) {
+      console.error("error while getting conversations", error);
     }
-  }
-  useEffect(()=>{
-getAllConversations()
-  },[])
+  };
+  useEffect(() => {
+    getAllConversations();
+  }, [token]);
 
   return (
-    <Sidebar className="!text-white w-64 z-[9999] " >
-    <SidebarContent className=" h-screen overflow-y-auto bg-[#004185] w-full">
-      {/* Header */}
-      <SidebarGroupLabel className="flex items-start justify-items-start mt-2">
-        {/* <SidebarGroupLabel className="text-white"></SidebarGroupLabel> */}
-        <Image src="/logo_academy.png" width={150} height={100} className="mx-auto my-5 bg-blend-difference" alt="logo-img"/>
-      </SidebarGroupLabel>
+    <Sidebar className="!text-white w-64 z-[9999] ">
+      <SidebarContent className=" h-screen overflow-y-auto bg-[#004185] w-full">
+        {/* Header */}
+        <SidebarGroupLabel className="flex items-start justify-items-start mt-2">
+          {/* <SidebarGroupLabel className="text-white"></SidebarGroupLabel> */}
+          <Image
+            src="/logo_academy.png"
+            width={150}
+            height={100}
+            className="mx-auto my-5 bg-blend-difference"
+            alt="logo-img"
+          />
+        </SidebarGroupLabel>
 
-      <SidebarMenu className="my-10">
-        <SidebarGroup>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="text-white hover:text-[#231F20] hover:bg-white">
-              <button
-                className="px-4 py-2 !text-md"
-                onClick={newConversationHandler}
-              >
-                New Chat
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarGroup>
-        {/* Today Section */}
-        
-        {today.length > 0 && (
+        <SidebarMenu className="my-10">
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4 !text-white text-xl">
-              Today
-            </SidebarGroupLabel>
-            <div className="flex flex-col gap-3">
-            {today.map((conversation) => (
-              <SidebarMenuItem key={conversation.session_id}>
-                <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
-                  <button
-                    className="block px-4 py-2 !text-md "
-                    onClick={() => {
-                      clearConversationId();
-                      setConversationId(conversation.session_id);
-                    }}
-                  >
-                    <span>{conversation.title}</span>
-                    {/* <small className="block text-gray-400 text-xs">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                className="text-white hover:text-[#231F20] hover:bg-white"
+              >
+                <button
+                  className="px-4 py-2 !text-md"
+                  onClick={newConversationHandler}
+                >
+                  New Chat
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarGroup>
+          {/* Today Section */}
+
+          {today.length > 0 && (
+            <SidebarGroup>
+              <SidebarGroupLabel className="px-4 !text-white text-xl">
+                Today
+              </SidebarGroupLabel>
+              <div className="flex flex-col gap-3">
+                {today.map((conversation) => (
+                  <SidebarMenuItem key={conversation.session_id}>
+                    <SidebarMenuButton
+                      asChild
+
+                      className={`text-white hover:text-[#231F20] hover:bg-white ${conversationId === conversation.session_id && "bg-white text-[#231F20] "}`}
+                    >
+                      <button
+                        className="block px-4 py-2 !text-md "
+                        onClick={() => {
+                          clearConversationId();
+                          setConversationId(conversation.session_id);
+                        }}
+                      >
+{conversation.title}
+                        {/* <small className="block text-gray-400 text-xs">
                       Last active:{" "}
                       {format(
                         new Date(conversation.last_active_datetime),
                         "hh:mm a"
                       )}
                     </small> */}
-                  </button>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-            </div>
-          </SidebarGroup>
-        )}
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </div>
+            </SidebarGroup>
+          )}
 
-        {/* Yesterday Section */}
-        
-        {yesterday.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="px-4 mt-2 !text-white">
-              Yesterday
-            </SidebarGroupLabel>
-            <div className="flex flex-col gap-3">
-            {yesterday.map((conversation) => (
-              <SidebarMenuItem key={conversation.session_id}>
-                <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
-                  <button
-                    className="block px-4 py-2 w-full item-start !text-md hover:bg-white hover:text-black"
-                    onClick={() => {
-                      clearConversationId();
-                      setConversationId(conversation.session_id);
-                    }}
-                  >
-                    <span>{conversation.title}</span>
-                  </button>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-                 </div>
-          </SidebarGroup>
-        )}
-   
+          {/* Yesterday Section */}
 
-        {/* Previous 7 Days Section */}
-        {previous7Days.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="px-4 mt-2 !text-white">
-              Previous 7 Days
-            </SidebarGroupLabel>
-          <div className="flex flex-col gap-3">
-          {previous7Days.map((conversation) => (
-              <SidebarMenuItem key={conversation.session_id}>
-                <SidebarMenuButton asChild isActive={conversationId === conversation.session_id} className="text-white">
-                  <button
-                    className="block px-4 py-2 !text-md"
-                    onClick={() => {
-                      clearConversationId();
-                      setConversationId(conversation.session_id);
-                    }}
-                  >
-                    <span>{conversation.title}</span>
-                    {/* <small className="block text-gray-400 text-xs">
+          {yesterday.length > 0 && (
+            <SidebarGroup>
+              <SidebarGroupLabel className="px-4 mt-2 !text-white">
+                Yesterday
+              </SidebarGroupLabel>
+              <div className="flex flex-col gap-3">
+                {yesterday.map((conversation) => (
+                  <SidebarMenuItem key={conversation.session_id}>
+                    <SidebarMenuButton
+                      asChild
+
+                      className={`text-white hover:text-[#231F20] hover:bg-white ${conversationId === conversation.session_id && "bg-white text-[#231F20] "}`}
+                    >
+                      <button
+                        className="block px-4 py-2 w-full item-start !text-md hover:bg-white hover:text-black"
+                        onClick={() => {
+                          clearConversationId();
+                          setConversationId(conversation.session_id);
+                        }}
+                      >
+{conversation.title}
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </div>
+            </SidebarGroup>
+          )}
+
+          {/* Previous 7 Days Section */}
+          {previous7Days.length > 0 && (
+            <SidebarGroup>
+              <SidebarGroupLabel className="px-4 mt-2 !text-white">
+                Previous 7 Days
+              </SidebarGroupLabel>
+              <div className="flex flex-col gap-3">
+                {previous7Days.map((conversation) => (
+                  <SidebarMenuItem key={conversation.session_id}>
+                    <SidebarMenuButton
+                      asChild
+                      className={`text-white hover:text-[#231F20] hover:bg-white ${conversationId === conversation.session_id && "bg-white text-[#231F20] "}`}
+                    >
+                      <button
+                        className="block px-4 py-2 !text-md"
+                        onClick={() => {
+                          clearConversationId();
+                          setConversationId(conversation.session_id);
+                        }}
+                      >
+                        <span>{conversation.title}</span>
+                        {/* <small className="block text-gray-400 text-xs">
                         Last active: {format(new Date(conversation.last_active_datetime), "MMM d, hh:mm a")}
                       </small> */}
-                  </button>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </div>
-          </SidebarGroup>
-        )}
-      </SidebarMenu>
-    </SidebarContent>
-  </Sidebar>
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </div>
+            </SidebarGroup>
+          )}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
   );
 }
