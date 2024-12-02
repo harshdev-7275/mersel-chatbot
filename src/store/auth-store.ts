@@ -24,7 +24,6 @@ const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage', // Key used in localStorage
-      getStorage: () => localStorage, // Explicitly define storage
       onRehydrateStorage: () => (state) => {
         console.log("Rehydration complete:", state); // Debug when hydration is done
       },
