@@ -37,7 +37,7 @@ const {token} = useAuthStore();
           <main className="flex h-screen w-full">
             {
               token &&(
-                <SidebarTrigger className=" ml-2 mt-2 text-xl" />
+                <SidebarTrigger className=" ml-2 mt-2 text-xl absolute" />
               )
             }
          

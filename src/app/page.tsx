@@ -8,14 +8,14 @@ import { RespondQuery } from "@/helper/constant";
 import useConversationStore from "@/store/useConversationStore";
 import axios from "axios";
 import { API_URL } from "../../env";
-import { User } from "lucide-react";
+import { BotIcon, User } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import useAuthStore from "@/store/auth-store";
 import { useRouter } from "next/navigation";
-
+import MarkdownRenderer from "@/components/chatbot-components/MarkdownRenderer";
 
 interface Message {
   sender: "user" | "bot";
@@ -88,24 +88,23 @@ export default function ChatBot() {
   const { conversationId } = useConversationStore();
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const streamingMessageRef = useRef<string>("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isNewConversation, setIsNewConversation] = useState(true);
   const [isMessageLoading, setIsMessageLoading] = useState(true);
 
-
   const { token, user_id } = useAuthStore(); // Access token from Zustand
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    console.log("token in chatbot", token)
+    console.log("token in chatbot", token);
     if (!token) {
-      router.push('/login')
+      router.push("/login");
     }
-  }, [])
-  
+  }, []);
+
   const getMessageBySession = async () => {
     try {
       const res = await axios.get(
@@ -159,7 +158,7 @@ export default function ChatBot() {
       // Update the messages state
       setMessages(transformedMessages);
     } else {
-      // If no conversation is found, clear the messages
+
       setMessages([]);
     }
   }, [conversationId]);
@@ -187,7 +186,7 @@ export default function ChatBot() {
           }
           return updatedMessages;
         });
-        scrollToBottom();
+        throttledScrollToBottom();
       },
       (cards: any) => {
         setMessages((prevMessages) => {
@@ -215,9 +214,36 @@ export default function ChatBot() {
     setIsNewConversation(false); // Set to false after the first message
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior,
+      });
+    }
   };
+
+
+  const throttledScrollToBottom = useCallback(
+    throttle(() => {
+      scrollToBottom("smooth");
+    }, 100), // Adjust the delay (100ms) as needed
+    []
+  );
+
+  // Scroll smoothly when a new message is added
+  useEffect(() => {
+    if (!isStreaming) {
+      scrollToBottom("smooth");
+    }
+  }, [messages.length]);
+
+  // Scroll smoothly during streaming
+  useEffect(() => {
+    if (isStreaming) {
+      throttledScrollToBottom();
+    }
+  }, [messages[messages.length - 1]?.content]);
 
   const focusInput = () => {
     inputRef.current?.focus();
@@ -226,6 +252,7 @@ export default function ChatBot() {
   useEffect(() => {
     focusInput();
   }, []);
+
   const skeletonMessages = [
     {
       sender: "user",
@@ -236,6 +263,26 @@ export default function ChatBot() {
       content: "Hello, how can I help you today?",
     },
   ];
+
+  // Throttle function
+  function throttle(func: (...args: any[]) => void, limit: number) {
+    let lastFunc: NodeJS.Timeout;
+    let lastRan: number;
+    return function (this:any,...args: any[]) {
+      if (!lastRan) {
+        func.apply(this, args);
+        lastRan = Date.now();
+      } else {
+        clearTimeout(lastFunc);
+        lastFunc = setTimeout(() => {
+          if (Date.now() - lastRan >= limit) {
+            func.apply(this, args);
+            lastRan = Date.now();
+          }
+        }, limit - (Date.now() - lastRan));
+      }
+    };
+  }
 
   async function getBotResponse(
     message: string,
@@ -309,7 +356,10 @@ export default function ChatBot() {
   return (
     <div className="flex flex-col items-center bg-[#EBF1F4] h-full w-full p-4 overflow-hidden">
       <div className="w-full max-w-[900px] container mx-auto mt-6 flex flex-col items-center">
-        <div className="flex-grow w-full overflow-y-auto scrollbar-hide space-y-4 h-[78vh] mb-4">
+        <div
+          ref={messagesContainerRef}
+          className="flex-grow w-full overflow-y-auto scrollbar-hide space-y-4 h-[78vh] mb-4"
+        >
           {isMessageLoading ? (
             skeletonMessages.map((msg, index) => (
               <div
@@ -329,8 +379,8 @@ export default function ChatBot() {
                     <User color="#231F20" size={24} />
                   ) : isStreaming ? (
                     <User color="#1875AA" size={24} className="shrink-0" />
-                  ) : ( 
-                    <User color="#1875AA" size={24} className="shrink-0"  />
+                  ) : (
+<BotIcon color="#1875AA" size={24} className="shrink-0" />
                   )}
                   <div
                     className={`p-2 rounded-lg max-w-full ${
@@ -362,9 +412,9 @@ export default function ChatBot() {
                   {msg.sender === "user" ? (
                     <User color="#231F20" size={24} />
                   ) : isStreaming ? (
-                    <User color="#1875AA" size={24} />
+<BotIcon color="#1875AA" size={24} className="shrink-0" />
                   ) : (
-                    <User color="#1875AA" size={24} />
+                    <BotIcon color="#1875AA" size={24} className ="shrink-0" />
                   )}
                   <div className="flex flex-col gap-5">
                     <div
@@ -374,12 +424,7 @@ export default function ChatBot() {
                           : "bg-white text-left"
                       }`}
                     >
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={CustomMarkdownComponents}
-                      >
-                        {msg.content}
-                      </ReactMarkdown>
+                      <MarkdownRenderer content={msg.content} inline={true} />
                     </div>
                     <div>
                       {msg.meta_data?.cards && (
@@ -410,9 +455,18 @@ export default function ChatBot() {
               <TypewriterText />
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
         <div className="w-full">
+        {isStreaming && (
+  <div className="flex justify-center w-full mb-4">
+    <div className="flex space-x-2">
+      <div className="h-3 w-3 rounded-full animate-blue-white" style={{ animationDelay: "0ms" }}></div>
+      <div className="h-3 w-3 rounded-full animate-blue-white" style={{ animationDelay: "100ms" }}></div>
+      <div className="h-3 w-3 rounded-full animate-blue-white" style={{ animationDelay: "200ms" }}></div>
+    </div>
+  </div>
+)}
+
           <MessageInput
             onSend={handleSend}
             disabled={isStreaming}

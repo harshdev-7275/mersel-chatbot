@@ -9,6 +9,15 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		keyframes: {
+			"blue-white": {
+			  "0%, 100%": { backgroundColor: "#3B82F6" }, // blue
+			  "50%": { backgroundColor: "#FFFFFF" }, // white
+			},
+		  },
+		  animation: {
+			"blue-white": "blue-white 1.5s infinite ease-in-out",
+		  },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
