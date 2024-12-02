@@ -103,11 +103,15 @@ export function AppSidebar(): JSX.Element {
   const newConversationHandler = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
+
     }
 
     clearConversationId();
     setConversationId(uuidv4());
-    getAllConversations();
+    if (e) {
+
+      getAllConversations()
+    }
 
   };
   const getAllConversations = async () => {
