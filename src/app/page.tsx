@@ -95,7 +95,8 @@ export default function ChatBot() {
   const [isNewConversation, setIsNewConversation] = useState(true);
   const [isMessageLoading, setIsMessageLoading] = useState(true);
 
-  const { token } = useAuthStore(); // Access token from Zustand
+
+  const { token, user_id } = useAuthStore(); // Access token from Zustand
   const router = useRouter()
 
   useEffect(() => {
@@ -249,7 +250,7 @@ export default function ChatBot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           session_id: conversationId,
-          user_id: "P2866",
+          user_id: user_id,
           query: message,
           fixed_data: {
             token: token,
@@ -327,9 +328,9 @@ export default function ChatBot() {
                   {msg.sender === "user" ? (
                     <User color="#231F20" size={24} />
                   ) : isStreaming ? (
-                    <User color="#1875AA" size={24} />
-                  ) : (
-                    <User color="#1875AA" size={24} />
+                    <User color="#1875AA" size={24} className="shrink-0" />
+                  ) : ( 
+                    <User color="#1875AA" size={24} className="shrink-0"  />
                   )}
                   <div
                     className={`p-2 rounded-lg max-w-full ${

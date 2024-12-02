@@ -9,7 +9,9 @@ const api = axios.create({
     }
   });
 export async function authenticateUser(credentials: any) {
-  const { setToken } = useAuthStore.getState(); // No more 'unknown' type error
+  const { setToken, setUserId } = useAuthStore.getState(); // No more 'unknown' type error
+  console.log("credentials", credentials)
+ 
 
   const response = await api.post('/conversation/get_token', credentials);
   console.log("response", response.data)
@@ -18,5 +20,6 @@ export async function authenticateUser(credentials: any) {
   }
 
   const { token } =  response.data;
+  setUserId(credentials.username);
   setToken(token); // Safely set the token
 }
