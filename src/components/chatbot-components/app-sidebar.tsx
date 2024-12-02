@@ -103,16 +103,13 @@ export function AppSidebar(): JSX.Element {
   const newConversationHandler = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
-
     }
 
     clearConversationId();
     setConversationId(uuidv4());
     if (e) {
-
-      getAllConversations()
+      getAllConversations();
     }
-
   };
   const getAllConversations = async () => {
     try {
@@ -132,19 +129,22 @@ export function AppSidebar(): JSX.Element {
   useEffect(() => {
     getAllConversations();
   }, [token]);
+  useEffect(() => {
+    getAllConversations();
+  }, []);
 
   return (
     <Sidebar className="!text-white w-64 z-[9999] ">
       <SidebarContent className=" h-screen overflow-y-auto bg-[#004185] w-full">
         {/* Header */}
         <SidebarGroupLabel className="flex items-start justify-items-start mt-2">
-          {/* <SidebarGroupLabel className="text-white"></SidebarGroupLabel> */}
           <Image
             src="/logo_academy.png"
             width={150}
             height={100}
             className="mx-auto my-5 bg-blend-difference"
             alt="logo-img"
+            priority={true}
           />
         </SidebarGroupLabel>
 
@@ -171,13 +171,15 @@ export function AppSidebar(): JSX.Element {
               <SidebarGroupLabel className="px-4 !text-white text-xl">
                 Today
               </SidebarGroupLabel>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 mt-2">
                 {today.map((conversation) => (
                   <SidebarMenuItem key={conversation.session_id}>
                     <SidebarMenuButton
                       asChild
-
-                      className={`text-white hover:text-[#231F20] hover:bg-white ${conversationId === conversation.session_id && "bg-white text-[#231F20] "}`}
+                      className={`text-white hover:text-[#231F20] hover:bg-white ${
+                        conversationId === conversation.session_id &&
+                        "bg-white text-[#231F20] "
+                      }`}
                     >
                       <button
                         className="block px-4 py-2 !text-md "
@@ -186,7 +188,7 @@ export function AppSidebar(): JSX.Element {
                           setConversationId(conversation.session_id);
                         }}
                       >
-{conversation.title}
+                        {conversation.title}
                         {/* <small className="block text-gray-400 text-xs">
                       Last active:{" "}
                       {format(
@@ -214,8 +216,10 @@ export function AppSidebar(): JSX.Element {
                   <SidebarMenuItem key={conversation.session_id}>
                     <SidebarMenuButton
                       asChild
-
-                      className={`text-white hover:text-[#231F20] hover:bg-white ${conversationId === conversation.session_id && "bg-white text-[#231F20] "}`}
+                      className={`text-white hover:text-[#231F20] hover:bg-white ${
+                        conversationId === conversation.session_id &&
+                        "bg-white text-[#231F20] "
+                      }`}
                     >
                       <button
                         className="block px-4 py-2 w-full item-start !text-md hover:bg-white hover:text-black"
@@ -224,7 +228,7 @@ export function AppSidebar(): JSX.Element {
                           setConversationId(conversation.session_id);
                         }}
                       >
-{conversation.title}
+                        {conversation.title}
                       </button>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -244,7 +248,10 @@ export function AppSidebar(): JSX.Element {
                   <SidebarMenuItem key={conversation.session_id}>
                     <SidebarMenuButton
                       asChild
-                      className={`text-white hover:text-[#231F20] hover:bg-white ${conversationId === conversation.session_id && "bg-white text-[#231F20] "}`}
+                      className={`text-white hover:text-[#231F20] hover:bg-white ${
+                        conversationId === conversation.session_id &&
+                        "bg-white text-[#231F20] "
+                      }`}
                     >
                       <button
                         className="block px-4 py-2 !text-md"
