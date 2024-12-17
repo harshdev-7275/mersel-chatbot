@@ -477,7 +477,7 @@ export default function Chatbot() {
             </div>
           )}
         </div>
-        <div className="w-full">
+        <div className="w-full fixed bottom-2 left-0 md:left-[15%]">
           {isStreaming && (
             <div className="flex justify-center w-full mb-4">
               <div className="flex space-x-2">
@@ -500,7 +500,7 @@ export default function Chatbot() {
           <MessageInput
             onSend={handleSend}
             disabled={isStreaming}
-            styles="bg-white text-[#231F20] w-full md:w-[70%] mx-auto px-4 py-1 fixed bottom-2 left-0 md:left-[15%] min-h-[50px] max-h-[100px] "
+            styles="bg-white text-[#231F20] w-full md:w-[70%] mx-auto px-4 py-1 min-h-[50px] max-h-[100px] "
             // inputRef={textAreaRef}
           />
         </div>
