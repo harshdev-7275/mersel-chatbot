@@ -501,7 +501,7 @@ export default function Chatbot() {
             onSend={handleSend}
             disabled={isStreaming}
             styles="bg-white text-[#231F20] w-full mx-auto px-4 py-1 fixed bottom-2 left-0 min-h-[50px] max-h-[100px]"
-            inputRef={textAreaRef}
+            // inputRef={textAreaRef}
           />
         </div>
        
