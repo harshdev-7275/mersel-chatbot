@@ -1,12 +1,11 @@
 "use client";
 import { SendHorizonal } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface MessageInputProps {
   placeholder?: string;
   onSend?: (message: string) => void;
   styles?: string;
-  inputRef?: React.RefObject<HTMLInputElement>;
   disabled?: boolean;
 }
 
@@ -17,48 +16,76 @@ export default function MessageInput({
   disabled = false,
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
-  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Adjust textarea height dynamically with min and max constraints
+  const adjustTextareaHeight = () => {
+    const textarea = textAreaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // Reset to auto first
+      // const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 150); // Between 40px and 150px
+      // textarea.style.height = `${newHeight}px`;
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+
+    }
+  };
+
+  // Adjust height whenever the message changes
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [message]);
+
   const handleSend = () => {
     if (onSend && message.trim()) {
-      onSend(message);
+      onSend(message.trim());
       setMessage("");
+      adjustTextareaHeight(); // Reset height after sending
       textAreaRef.current?.focus();
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      // Prevent default behavior and send the message
       e.preventDefault();
       handleSend();
-    } else if (e.key === "Enter" && e.shiftKey) {
-      e.preventDefault();
-      console.log("Shift + Enter pressed");
-      // Allow new line when Shift + Enter is pressed
-      setMessage((prev) => prev + "\n");
-      console.log(message);
     }
   };
 
   return (
     <form
-      className={`flex items-center gap-2 px-5 rounded-full ${styles}`}
+      className={`flex items-center gap-2 px-5 rounded-md ${styles}`}
       onSubmit={(e) => {
         e.preventDefault();
         handleSend();
       }}
     >
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className={`w-full h-[40px] bg-transparent outline-none border-none text-[#231F20] resize-none p-2 rounded-lg`}
-        rows={3}
-        disabled={disabled}
-      />
+<textarea
+  ref={textAreaRef}
+  value={message}
+  onChange={(e) => setMessage(e.target.value)}
+  autoFocus={true}
+            rows={1}
+  onKeyDown={handleKeyDown}
+  placeholder={placeholder}
+  className={`w-full bg-transparent outline-none border-none text-[#231F20] resize-none p-2 rounded-lg`}
+  style={{
+    minHeight: "40px",   // Minimum height of the textarea
+    maxHeight: "76px",  // Maximum height before scrollbar appears
+    overflowY: "auto",   // Show scrollbar when content overflows
+    wordWrap: "break-word", // Prevent horizontal overflow
+    WebkitOverflowScrolling: "touch", // For smooth scroll experience on iOS
+      scrollbarWidth: "none", // For Firefox
+  }}
+  disabled={disabled}
+/>
 
-      <button type="button" onClick={handleSend} disabled={disabled}>
+
+      <button
+        type="button"
+        onClick={handleSend}
+        disabled={disabled || !message.trim()}
+        className={`p-2 text-[#231F20] disabled:opacity-50`}
+      >
         <SendHorizonal />
       </button>
     </form>

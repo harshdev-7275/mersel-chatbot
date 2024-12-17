@@ -99,6 +99,8 @@ export default function Chatbot() {
     const [isNewConversation, setIsNewConversation] = useState(true);
     const [isMessageLoading, setIsMessageLoading] = useState(true);
     const [isResetLogoMoving, setIsResetLogoMoving] = useState(false);
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
   
     const { token, user_id } = useAuthStore(); 
 
@@ -377,7 +379,7 @@ export default function Chatbot() {
       <div className="w-full max-w-[900px] container mx-auto mt-6 flex flex-col items-center">
         <div
           ref={messagesContainerRef}
-          className="flex-grow w-full overflow-y-auto scrollbar-hide space-y-4 h-[78vh] mb-4"
+          className="flex-grow w-full overflow-y-auto scrollbar-hide space-y-4 mb-4"
         >
           {isMessageLoading ? (
             skeletonMessages.map((msg, index) => (
@@ -498,8 +500,8 @@ export default function Chatbot() {
           <MessageInput
             onSend={handleSend}
             disabled={isStreaming}
-            styles="bg-white text-[#231F20] w-full mx-auto px-4 py-3"
-            inputRef={inputRef}
+            styles="bg-white text-[#231F20] w-full mx-auto px-4 py-1 fixed bottom-2 left-0 min-h-[50px] max-h-[100px]"
+            // inputRef={textAreaRef}
           />
         </div>
        
