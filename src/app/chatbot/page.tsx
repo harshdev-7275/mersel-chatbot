@@ -379,7 +379,7 @@ export default function Chatbot() {
       <div className="w-full max-w-[900px] container mx-auto mt-6 flex flex-col items-center">
         <div
           ref={messagesContainerRef}
-          className="flex-grow w-full overflow-y-auto scrollbar-hide space-y-4 mb-4"
+          className="flex-grow w-full overflow-y-auto max-h-[85vh] scrollbar-hide space-y-4 mb-4"
         >
           {isMessageLoading ? (
             skeletonMessages.map((msg, index) => (
