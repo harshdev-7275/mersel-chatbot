@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import MarkdownRenderer from "@/components/chatbot-components/MarkdownRenderer";
 import useConversationStore from "@/store/useConversationStore";
 import { Button } from "@/components/ui/button";
-import {v4 as uuid} from "uuid"
+import { v4 as uuid } from "uuid";
 
 interface Message {
   sender: "user" | "bot";
@@ -87,295 +87,288 @@ const conversations: Conversation[] = [
 ];
 
 export default function Chatbot() {
+  const { conversationId } = useConversationStore();
 
+  const [messages, setMessages] = useState<Message[]>([]);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const streamingMessageRef = useRef<string>("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isNewConversation, setIsNewConversation] = useState(true);
+  const [isMessageLoading, setIsMessageLoading] = useState(true);
+  const [isResetLogoMoving, setIsResetLogoMoving] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-    const { conversationId } = useConversationStore();
+  const { token, user_id } = useAuthStore();
 
-    const [messages, setMessages] = useState<Message[]>([]);
-    const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-    const inputRef = useRef<HTMLInputElement | null>(null);
-    const streamingMessageRef = useRef<string>("");
-    const [isStreaming, setIsStreaming] = useState(false);
-    const [isNewConversation, setIsNewConversation] = useState(true);
-    const [isMessageLoading, setIsMessageLoading] = useState(true);
-    const [isResetLogoMoving, setIsResetLogoMoving] = useState(false);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter();
 
-  
-    const { token, user_id } = useAuthStore(); 
-
-    const router = useRouter();
-  
-    useEffect(() => {
-      console.log("token in chatbot", token);
-      if (!token) {
-        router.push("/");
-      }
-    }, [token, router]);
-  
-    const getMessageBySession = async () => {
-        try {
-          const res = await axios.get(`${API_URL}/conversation/session?user_id=${user_id}`);
-          console.log("Backend response:", res.data);
-    
-          const transformedMessages: Message[] = res.data
-            .map((msg: any) => [
-              {
-                sender: "user",
-                content: msg.user_query,
-              },
-              {
-                sender: "bot",
-                content: msg.ai_response,
-                meta_data: msg.meta_data, // Pass metadata for cards
-              },
-            ])
-            .flat();
-          setMessages(transformedMessages);
-        } catch (error) {
-          console.error("Error fetching messages:", error);
-        } finally {
-          setIsMessageLoading(false);
-        }
-      };
-    useEffect(() => {
-      setIsMessageLoading(true); // Trigger skeleton loading
-      getMessageBySession();
-    }, [conversationId]);
-  
-    useEffect(() => {
-      // Find the conversation matching the current conversationId
-      const conversation = conversations.find(
-        (conv) => conv.session_id === conversationId
-      );
-  
-      if (conversation) {
-        // Transform the conversation messages to match the Message[] format
-        const transformedMessages: any = conversation.messages
-          .map((msg) => [
-            { sender: "user", content: msg.user_query },
-            { sender: "bot", content: msg.ai_response },
-          ])
-          .flat();
-  
-        // Update the messages state
-        setMessages(transformedMessages);
-      } else {
-  
-        setMessages([]);
-      }
-    }, [user_id]);
-
-
-    const handleReset = async () => {
-        setIsResetLogoMoving(true);
-        try {
-          const res = await axios.post(`${API_URL}/conversation/reset`, {
-            user_id,
-          });
-          console.log("Reset response:", res.data);
-          setMessages([]);
-          setIsNewConversation(true); 
-        } catch (error) {
-          console.error("Error resetting conversation:", error);
-        }finally{
-          setIsResetLogoMoving(false);
-        }
-      };
-    
-  
-    const handleSend = async (message: string) => {
-       
-      setIsStreaming(true);
-      streamingMessageRef.current = "";
-  
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: "user", content: message },
-        { sender: "bot", content: "", isStreaming: true },
-      ]);
-  
-      await getBotResponse(
-        message,
-        isNewConversation,
-        (chunk) => {
-          streamingMessageRef.current += chunk;
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage && lastMessage.isStreaming) {
-              lastMessage.content = streamingMessageRef.current;
-            }
-            return updatedMessages;
-          });
-          throttledScrollToBottom();
-        },
-        (cards: any) => {
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage && lastMessage.isStreaming) {
-              lastMessage.meta_data = { ...lastMessage.meta_data, cards };
-            }
-            return updatedMessages;
-          });
-        }
-      );
-  
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages];
-        const lastMessage = updatedMessages[updatedMessages.length - 1];
-        if (lastMessage) {
-          lastMessage.isStreaming = false;
-        }
-        return updatedMessages;
-      });
-  
-      focusInput();
-      setIsStreaming(false);
-      setIsNewConversation(false); // Set to false after the first message
-    };
-  
-    const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-      if (messagesContainerRef.current) {
-        messagesContainerRef.current.scrollTo({
-          top: messagesContainerRef.current.scrollHeight,
-          behavior,
-        });
-      }
-    };
-  
-  
-    const throttledScrollToBottom = useCallback(
-      throttle(() => {
-        scrollToBottom("smooth");
-      }, 100), // Adjust the delay (100ms) as needed
-      []
-    );
-  
-    // Scroll smoothly when a new message is added
-    useEffect(() => {
-      if (!isStreaming) {
-        scrollToBottom("smooth");
-      }
-    }, [messages.length]);
-  
-    // Scroll smoothly during streaming
-    useEffect(() => {
-      if (isStreaming) {
-        throttledScrollToBottom();
-      }
-    }, [messages[messages.length - 1]?.content]);
-  
-    const focusInput = () => {
-      inputRef.current?.focus();
-    };
-  
-    useEffect(() => {
-      focusInput();
-    }, []);
-  
-    const skeletonMessages = [
-      {
-        sender: "user",
-        content: "Hello, how can I help you today?",
-      },
-      {
-        sender: "bot",
-        content: "Hello, how can I help you today?",
-      },
-    ];
-  
-    // Throttle function
-    function throttle(func: (...args: any[]) => void, limit: number) {
-      let lastFunc: NodeJS.Timeout;
-      let lastRan: number;
-      return function (this:any,...args: any[]) {
-        if (!lastRan) {
-          func.apply(this, args);
-          lastRan = Date.now();
-        } else {
-          clearTimeout(lastFunc);
-          lastFunc = setTimeout(() => {
-            if (Date.now() - lastRan >= limit) {
-              func.apply(this, args);
-              lastRan = Date.now();
-            }
-          }, limit - (Date.now() - lastRan));
-        }
-      };
+  useEffect(() => {
+    console.log("token in chatbot", token);
+    if (!token) {
+      router.push("/");
     }
-  
-    async function getBotResponse(
-      message: string,
-      isNewConversation: boolean,
-      onMessageChunk: (chunk: string) => void,
-      onCardsReceived?: (cards: any[]) => void
-    ): Promise<void> {
-      try {
-        console.log("message", isNewConversation);
-        const response = await fetch(`${API_URL}/conversation/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user_id,
-            query: message,
-            fixed_data: {
-              token: token,
-            },
-          }),
+  }, [token, router]);
+
+  const getMessageBySession = async () => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/conversation/session?user_id=${user_id}`
+      );
+      console.log("Backend response:", res.data);
+
+      const transformedMessages: Message[] = res.data
+        .map((msg: any) => [
+          {
+            sender: "user",
+            content: msg.user_query,
+          },
+          {
+            sender: "bot",
+            content: msg.ai_response,
+            meta_data: msg.meta_data, // Pass metadata for cards
+          },
+        ])
+        .flat();
+      setMessages(transformedMessages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    } finally {
+      setIsMessageLoading(false);
+    }
+  };
+  useEffect(() => {
+    setIsMessageLoading(true); // Trigger skeleton loading
+    getMessageBySession();
+  }, [conversationId]);
+
+  useEffect(() => {
+    // Find the conversation matching the current conversationId
+    const conversation = conversations.find(
+      (conv) => conv.session_id === conversationId
+    );
+
+    if (conversation) {
+      // Transform the conversation messages to match the Message[] format
+      const transformedMessages: any = conversation.messages
+        .map((msg) => [
+          { sender: "user", content: msg.user_query },
+          { sender: "bot", content: msg.ai_response },
+        ])
+        .flat();
+
+      // Update the messages state
+      setMessages(transformedMessages);
+    } else {
+      setMessages([]);
+    }
+  }, [user_id]);
+
+  const handleReset = async () => {
+    setIsResetLogoMoving(true);
+    try {
+      const res = await axios.post(`${API_URL}/conversation/reset`, {
+        user_id,
+      });
+      console.log("Reset response:", res.data);
+      setMessages([]);
+      setIsNewConversation(true);
+    } catch (error) {
+      console.error("Error resetting conversation:", error);
+    } finally {
+      setIsResetLogoMoving(false);
+    }
+  };
+
+  const handleSend = async (message: string) => {
+    setIsStreaming(true);
+    streamingMessageRef.current = "";
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { sender: "user", content: message },
+      { sender: "bot", content: "", isStreaming: true },
+    ]);
+
+    await getBotResponse(
+      message,
+      isNewConversation,
+      (chunk) => {
+        streamingMessageRef.current += chunk;
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+          if (lastMessage && lastMessage.isStreaming) {
+            lastMessage.content = streamingMessageRef.current;
+          }
+          return updatedMessages;
         });
-  
-        if (!response.ok) {
-          throw new Error("Failed to send the query");
-        }
-  
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-  
-        while (true) {
-          const { done, value } = await reader!.read();
-          if (done) break;
-  
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || ""; // Preserve incomplete line
-  
-          lines.forEach((line) => {
-            if (line.startsWith("data: ")) {
-              const data = line.slice(6).trim();
-              if (data) {
-                try {
-                  const parsedData = JSON.parse(data);
-  
-                  // Handle message chunks
-                  if (parsedData.message_chunk) {
-                    onMessageChunk(parsedData.message_chunk);
-                  }
-  
-                  // Handle cards in metadata
-                  if (parsedData.meta_data?.cards) {
-                    const cards = parsedData.meta_data.cards;
-                    if (onCardsReceived) {
-                      onCardsReceived(cards);
-                    }
-                  }
-                } catch (error) {
-                  console.error("Error parsing response:", error);
+        throttledScrollToBottom();
+      },
+      (cards: any) => {
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+          if (lastMessage && lastMessage.isStreaming) {
+            lastMessage.meta_data = { ...lastMessage.meta_data, cards };
+          }
+          return updatedMessages;
+        });
+      }
+    );
+
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages];
+      const lastMessage = updatedMessages[updatedMessages.length - 1];
+      if (lastMessage) {
+        lastMessage.isStreaming = false;
+      }
+      return updatedMessages;
+    });
+
+    focusInput();
+    setIsStreaming(false);
+    setIsNewConversation(false); // Set to false after the first message
+  };
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior,
+      });
+    }
+  };
+
+  const throttledScrollToBottom = useCallback(
+    throttle(() => {
+      scrollToBottom("smooth");
+    }, 100), // Adjust the delay (100ms) as needed
+    []
+  );
+
+  // Scroll smoothly when a new message is added
+  useEffect(() => {
+    if (!isStreaming) {
+      scrollToBottom("smooth");
+    }
+  }, [messages.length]);
+
+  // Scroll smoothly during streaming
+  useEffect(() => {
+    if (isStreaming) {
+      throttledScrollToBottom();
+    }
+  }, [messages[messages.length - 1]?.content]);
+
+  const focusInput = () => {
+    inputRef.current?.focus();
+  };
+
+  useEffect(() => {
+    focusInput();
+  }, []);
+
+  const skeletonMessages = [
+    {
+      sender: "user",
+      content: "Hello, how can I help you today?",
+    },
+    {
+      sender: "bot",
+      content: "Hello, how can I help you today?",
+    },
+  ];
+
+  // Throttle function
+  function throttle(func: (...args: any[]) => void, limit: number) {
+    let lastFunc: NodeJS.Timeout;
+    let lastRan: number;
+    return function (this: any, ...args: any[]) {
+      if (!lastRan) {
+        func.apply(this, args);
+        lastRan = Date.now();
+      } else {
+        clearTimeout(lastFunc);
+        lastFunc = setTimeout(() => {
+          if (Date.now() - lastRan >= limit) {
+            func.apply(this, args);
+            lastRan = Date.now();
+          }
+        }, limit - (Date.now() - lastRan));
+      }
+    };
+  }
+
+  async function getBotResponse(
+    message: string,
+    isNewConversation: boolean,
+    onMessageChunk: (chunk: string) => void,
+    onCardsReceived?: (cards: any[]) => void
+  ): Promise<void> {
+    try {
+      console.log("message", isNewConversation);
+      const response = await fetch(`${API_URL}/conversation/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user_id,
+          query: message,
+          fixed_data: {
+            token: token,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send the query");
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader!.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || ""; // Preserve incomplete line
+
+        lines.forEach((line) => {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6).trim();
+            if (data) {
+              try {
+                const parsedData = JSON.parse(data);
+
+                // Handle message chunks
+                if (parsedData.message_chunk) {
+                  onMessageChunk(parsedData.message_chunk);
                 }
+
+                // Handle cards in metadata
+                if (parsedData.meta_data?.cards) {
+                  const cards = parsedData.meta_data.cards;
+                  if (onCardsReceived) {
+                    onCardsReceived(cards);
+                  }
+                }
+              } catch (error) {
+                console.error("Error parsing response:", error);
               }
             }
-          });
-        }
-      } catch (error) {
-        console.error("Error with fetch:", error);
-        onMessageChunk("Error retrieving response.");
+          }
+        });
       }
+    } catch (error) {
+      console.error("Error with fetch:", error);
+      onMessageChunk("Error retrieving response.");
     }
+  }
   return (
     <div className="flex flex-col items-center bg-[#EBF1F4] h-full w-full p-4 overflow-hidden">
-       
       <div className="w-full max-w-[900px] container mx-auto mt-6 flex flex-col items-center">
         <div
           ref={messagesContainerRef}
@@ -477,7 +470,7 @@ export default function Chatbot() {
             </div>
           )}
         </div>
-        <div className="w-full fixed bottom-2 left-0 md:left-[15%]">
+        <div className="w-full fixed bottom-2 left-0 ">
           {isStreaming && (
             <div className="flex justify-center w-full mb-4">
               <div className="flex space-x-2">
@@ -504,7 +497,6 @@ export default function Chatbot() {
             // inputRef={textAreaRef}
           />
         </div>
-       
       </div>
       <Button
         onClick={handleReset}
@@ -513,7 +505,6 @@ export default function Chatbot() {
         <RotateCcw className={`${isResetLogoMoving && "animate-spin"}`} />
         <span className="uppercase leading-tight">Reset</span>
       </Button>
-
     </div>
   );
 }
